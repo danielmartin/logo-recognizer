@@ -224,9 +224,11 @@ def expand_feature_rectangle (img, seeds, numRectangles):
     print file_name, numRectangles
     return output
 
-def dilate (img):
-    """ This function dilates the document using a 1x1 kernel."""
-    dilated_img = cv2.dilate(img, None)
+def enhance_image (img):
+    """This function enhances the document by applying a dilation after
+an erosion."""
+    eroded_img = cv2.erode(img, None, 5)
+    dilated_img = cv2.dilate(eroded_img, None, 2)
     return dilated_img
 
 numRectangles = 0
@@ -238,7 +240,7 @@ if __name__ == "__main__":
     parser.add_argument("output_path_limit", help="path where the output images with boundary marks are stored")
     parser.add_argument("output_path_blanks", help="path where the output images with blank spaces are stored")
     parser.add_argument("output_path_regions", help="path where the region crops are stored")
-    parser.add_argument("--dilate", "-d", help="dilate the input image first", action="store_true")
+    parser.add_argument("--enhance", "-e", help="enhance morphologically the input image", action="store_true")
     args = parser.parse_args()
     
     dir_list = os.listdir(args.input_path)
@@ -249,8 +251,8 @@ if __name__ == "__main__":
             color_img_regions = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             color_img_limit = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
             color_img_blanks = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-            if args.dilate:
-                img = dilate(img)
+            if args.enhance:
+                img = enhance_image(img)
             # Generate the seeds from where the logo detection starts
             seeds = calculate_seeds(img)
             # Expand feature rectangles around the seeds
